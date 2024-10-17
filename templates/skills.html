@@ -1,0 +1,61 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore Skills</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="header">
+        <a href="/">Home</a>
+        <a href="/skills">Learn Skill</a>
+        <a href="/about">About</a>
+    </div>
+
+    <div class="skills-container">
+        {% for skill in skills.iterrows() %}
+        <div class="skill-card">
+            <h3>{{ skill[1]['Skill Name'] }}</h3>
+            <p><b>Domain:</b> {{ skill[1]['Domain'] }}</p>
+            <p><b>Level:</b> {{ skill[1]['Level'] }}</p>
+            <p><b>Duration:</b> {{ skill[1]['Duration (hours)'] }} hours</p>
+            <a href="/roadmap/{{ skill[1]['Skill Name'] }}" class="skill-btn">Explore Now</a>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html> -->
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore Skills</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="header">
+        <a href="/">Home</a>
+        <a href="/skills">Learn Skill</a>
+        <a href="/about">About</a>
+    </div>
+
+    <div class="skills-container">
+        {% for skill in skills.iterrows() %}
+        <div class="skill-card">
+            <h3>{{ skill[1]['Skill Name'] }}</h3>
+            <p><b>Domain:</b> {{ skill[1]['Domain'] }}</p>
+            <p><b>Level:</b> {{ skill[1]['Level'] }}</p>
+            <p><b>Duration:</b> {{ skill[1]['Duration (hours)'] }} hours</p>
+            <a href="/roadmap/{{ skill[1]['Skill Name'] }}" class="skill-btn">Explore Now</a>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
