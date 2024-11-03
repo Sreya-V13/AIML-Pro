@@ -17,13 +17,50 @@
         {% for skill in skills.iterrows() %}
         <div class="skill-card">
             <h3>{{ skill[1]['Skill Name'] }}</h3>
-            <p><b>Domain:</b> {{ skill[1]['Domain'] }}</p>
-            <p><b>Level:</b> {{ skill[1]['Level'] }}</p>
-            <p><b>Duration:</b> {{ skill[1]['Duration (hours)'] }} hours</p>
-            <a href="/roadmap/{{ skill[1]['Skill Name'] }}" class="skill-btn">Explore Now</a>
+            <div class="rating">
+                <span class="stars">
+                    {% for _ in range(skill[1]['Rating']|int) %}
+                    ★
+                    {% endfor %}
+                    {% if skill[1]['Rating'] % 1 >= 0.5 %}
+                    ½
+                    {% endif %}
+                </span>
+                <span class="rating-value">
+                    {{ "%.1f"|format(skill[1]['Rating']) }}/5
+                    <span class="rating-tooltip">
+                        <div class="tooltip-content">
+                            Ensemble-based rating considering:
+                            - Complexity
+                            - Market Demand
+                            - Learning Curve
+                            - Resource Availability
+                        </div>
+                    </span>
+                </span>
+            </div>
+            <div class="skill-info">
+                <p><strong>Domain:</strong> {{ skill[1]['Domain'] }}</p>
+                <p><strong>Level:</strong> {{ skill[1]['Level'] }}</p>
+                <p><strong>Duration:</strong> 
+                    {% set hours = skill[1]['Duration (hours)'] %}
+                    {% set days = (hours / 3) | round | int %}
+                    {% set months = (days / 30) | round(1) %}
+                    {% if months >= 1 %}
+                        {{ months }} months
+                    {% else %}
+                        {{ days }} days
+                    {% endif %}
+                </p>
+            </div>
+            <a href="{{ url_for('roadmap', skill_name=skill[1]['Skill Name']|replace('/', '_')) }}" class="skill-btn">Explore Now</a>
         </div>
         {% endfor %}
     </div>
+
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <i class="fas fa-moon"></i>
+    </button>
 </body>
 </html> -->
 
@@ -50,12 +87,49 @@
         {% for skill in skills.iterrows() %}
         <div class="skill-card">
             <h3>{{ skill[1]['Skill Name'] }}</h3>
-            <p><b>Domain:</b> {{ skill[1]['Domain'] }}</p>
-            <p><b>Level:</b> {{ skill[1]['Level'] }}</p>
-            <p><b>Duration:</b> {{ skill[1]['Duration (hours)'] }} hours</p>
-            <a href="/roadmap/{{ skill[1]['Skill Name'] }}" class="skill-btn">Explore Now</a>
+            <div class="rating">
+                <span class="stars">
+                    {% for _ in range(skill[1]['Rating']|int) %}
+                    ★
+                    {% endfor %}
+                    {% if skill[1]['Rating'] % 1 >= 0.5 %}
+                    ½
+                    {% endif %}
+                </span>
+                <span class="rating-value">
+                    {{ "%.1f"|format(skill[1]['Rating']) }}/5
+                    <span class="rating-tooltip">
+                        <div class="tooltip-content">
+                            Ensemble-based rating considering:
+                            - Complexity
+                            - Market Demand
+                            - Learning Curve
+                            - Resource Availability
+                        </div>
+                    </span>
+                </span>
+            </div>
+            <div class="skill-info">
+                <p><strong>Domain:</strong> {{ skill[1]['Domain'] }}</p>
+                <p><strong>Level:</strong> {{ skill[1]['Level'] }}</p>
+                <p><strong>Duration:</strong> 
+                    {% set hours = skill[1]['Duration (hours)'] %}
+                    {% set days = (hours / 3) | round | int %}
+                    {% set months = (days / 30) | round(1) %}
+                    {% if months >= 1 %}
+                        {{ months }} months
+                    {% else %}
+                        {{ days }} days
+                    {% endif %}
+                </p>
+            </div>
+            <a href="{{ url_for('roadmap', skill_name=skill[1]['Skill Name']|replace('/', '_')) }}" class="skill-btn">Explore Now</a>
         </div>
         {% endfor %}
     </div>
+
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <i class="fas fa-moon"></i>
+    </button>
 </body>
 </html>
