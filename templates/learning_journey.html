@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Journey</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="learning-container">
+        <!-- Progress Overview -->
+        <div class="progress-overview">
+            <div class="progress-circle" data-progress="0">
+                <div class="progress-circle-inner">
+                    <span class="progress-percentage">0%</span>
+                    <span class="progress-label">Complete</span>
+                </div>
+            </div>
+            <div class="progress-stats">
+                <div class="stat-item">
+                    <i class="fas fa-clock"></i>
+                    <span>Time Spent: <span id="timeSpent">0h</span></span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-tasks"></i>
+                    <span>Steps Completed: <span id="stepsCompleted">0/4</span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Skill Header -->
+        <div class="skill-header animate-in">
+            <h1>{{ skill.name }}</h1>
+            <div class="skill-details">
+                <span class="badge">{{ skill.Domain }}</span>
+                <span class="badge">{{ skill.Level }}</span>
+                <span class="badge">{{ skill['Duration (hours)'] }} hours</span>
+            </div>
+        </div>
+
+        <!-- Timeline Section -->
+        <div class="timeline-section animate-in">
+            <h2><i class="fas fa-calendar-alt"></i> Learning Schedule</h2>
+            <div class="timeline-cards">
+                <div class="timeline-card">
+                    <div class="card-icon"><i class="fas fa-play"></i></div>
+                    <h3>Start Date</h3>
+                    <p>{{ timeline.start_date }}</p>
+                </div>
+                <div class="timeline-card">
+                    <div class="card-icon"><i class="fas fa-flag-checkered"></i></div>
+                    <h3>End Date</h3>
+                    <p>{{ timeline.end_date }}</p>
+                </div>
+                <div class="timeline-card">
+                    <div class="card-icon"><i class="fas fa-hourglass-half"></i></div>
+                    <h3>Daily Goal</h3>
+                    <p>{{ timeline.hours_per_day }} hours</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Learning Path -->
+        <div class="learning-path animate-in">
+            <h2><i class="fas fa-road"></i> Learning Path</h2>
+            <div class="path-steps">
+                {% for step in skill['Learning Path'].split(' → ') %}
+                <div class="step-card" data-step="{{ loop.index }}">
+                    <div class="step-checkbox">
+                        <input type="checkbox" id="step{{ loop.index }}" class="step-check">
+                        <label for="step{{ loop.index }}"></label>
+                    </div>
+                    <div class="step-content">
+                        <h3>{{ step }}</h3>
+                        <div class="step-resources">
+                            <!-- First documentation button -->
+                            <button onclick="enableSecondaryDoc('{{ step }}')" class="resource-btn">
+                                <i class="fas fa-book"></i> Documentation
+                            </button>
+                            
+                            <!-- Secondary documentation button (initially hidden) -->
+                            <button onclick="showDocumentation('{{ step }}')" class="resource-btn secondary-doc" id="doc-btn-{{ step }}" style="display: none;">
+                                <i class="fas fa-external-link-alt"></i> Documentation
+                            </button>
+                            <a href="#" class="resource-link" onclick="showResources('{{ step }}')">
+                                <i class="fas fa-video"></i> Video Tutorials
+                            </a>
+                            <a href="#" class="resource-link" onclick="showResources('{{ step }}')">
+                                <i class="fas fa-laptop-code"></i> Practice Projects
+                            </a>
+                        </div>
+                        <div class="step-progress">
+                            <div class="progress-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Resume Button -->
+        <div class="resume-section">
+            <button id="saveProgress" class="btn-save">
+                <i class="fas fa-save"></i> Save Progress
+            </button>
+            <button id="resetProgress" class="btn-reset">
+                <i class="fas fa-undo"></i> Reset Progress
+            </button>
+        </div>
+    </div>
+
+    <!-- Resource Modal -->
+    <div id="resourceModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Learning Resources</h2>
+            <div class="resource-grid">
+                <!-- Resources will be dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Documentation Modal -->
+    <div id="documentationModal" class="modal">
+        <div class="modal-content documentation-modal">
+            <span class="close">&times;</span>
+            <div id="documentationContent">
+                <!-- Documentation content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Progress Tracking
+        let progress = 0;
+        const steps = document.querySelectorAll('.step-check');
+        const progressCircle = document.querySelector('.progress-circle');
+        const progressPercentage = document.querySelector('.progress-percentage');
+        const stepsCompleted = document.getElementById('stepsCompleted');
+
+        function updateProgress() {
+            const completedSteps = document.querySelectorAll('.step-check:checked').length;
+            progress = (completedSteps / steps.length) * 100;
+            progressCircle.style.setProperty('--progress', progress);
+            progressPercentage.textContent = Math.round(progress) + '%';
+            stepsCompleted.textContent = `${completedSteps}/${steps.length}`;
+            
+            // Save to localStorage
+            saveProgress();
+        }
+
+        // Step Checkboxes
+        steps.forEach(step => {
+            step.addEventListener('change', updateProgress);
+        });
+
+        // Save/Resume Functionality
+        function saveProgress() {
+            const progressData = {
+                completedSteps: Array.from(steps).map(step => step.checked),
+                timeSpent: document.getElementById('timeSpent').textContent,
+                lastSaved: new Date().toISOString()
+            };
+            localStorage.setItem('learningProgress', JSON.stringify(progressData));
+        }
+
+        function loadProgress() {
+            const savedProgress = localStorage.getItem('learningProgress');
+            if (savedProgress) {
+                const data = JSON.parse(savedProgress);
+                data.completedSteps.forEach((checked, index) => {
+                    steps[index].checked = checked;
+                });
+                document.getElementById('timeSpent').textContent = data.timeSpent;
+                updateProgress();
+            }
+        }
+
+        // Resource Modal
+        function showResources(step) {
+            const modal = document.getElementById('resourceModal');
+            const resourceGrid = modal.querySelector('.resource-grid');
+            resourceGrid.innerHTML = `
+                <div class="resource-card">
+                    <h3>Documentation</h3>
+                    <p>Official documentation for ${step}</p>
+                    <a href="#" class="btn-resource">View Docs</a>
+                </div>
+                <div class="resource-card">
+                    <h3>Video Tutorials</h3>
+                    <p>Step-by-step video guides</p>
+                    <a href="#" class="btn-resource">Watch Videos</a>
+                </div>
+                <div class="resource-card">
+                    <h3>Practice Projects</h3>
+                    <p>Hands-on projects for ${step}</p>
+                    <a href="#" class="btn-resource">Start Project</a>
+                </div>
+            `;
+            modal.style.display = 'block';
+        }
+
+        // Close Modal
+        document.querySelector('.close').onclick = function() {
+            document.getElementById('resourceModal').style.display = 'none';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProgress();
+            // Animation on scroll
+            const animateItems = document.querySelectorAll('.animate-in');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            });
+            animateItems.forEach(item => observer.observe(item));
+        });
+
+        function enableSecondaryDoc(step) {
+            // Show the secondary documentation button
+            const secondaryBtn = document.getElementById(`doc-btn-${step}`);
+            if (secondaryBtn) {
+                secondaryBtn.style.display = 'inline-block';
+            }
+        }
+
+        function showDocumentation(step) {
+            const modal = document.getElementById('documentationModal');
+            const content = document.getElementById('documentationContent');
+            
+            // Show loading state
+            content.innerHTML = '<div class="loading">Loading documentation...</div>';
+            modal.style.display = 'block';
+            
+            // Fetch documentation content
+            fetch(`/documentation/Frontend Development/${step}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    content.innerHTML = `
+                        <div class="documentation-wrapper">
+                            <div class="documentation-header">
+                                <h2>${step} Documentation</h2>
+                                <button onclick="openConceptDocs()" class="official-docs-link">
+                                    <i class="fas fa-external-link-alt"></i> Official Documentation
+                                </button>
+                            </div>
+                            <div class="documentation-content">
+                                ${data.content}
+                            </div>
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    content.innerHTML = `
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <p>${error.message}</p>
+                        </div>
+                    `;
+                });
+        }
+
+        // Close modal when clicking the close button or outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('documentationModal');
+            if (event.target == modal || event.target.classList.contains('close')) {
+                modal.style.display = 'none';
+            }
+        }
+
+        function openConceptDocs() {
+            // Get the current concept from the documentation-header h2
+            const pageTitle = document.querySelector('.documentation-header h2').textContent;
+            
+            // Open the correct URL based on the concept
+            if (pageTitle.includes('HTML Documentation')) {
+                window.open('https://www.w3schools.com/html/default.asp', '_blank');
+            } 
+            else if (pageTitle.includes('CSS Documentation')) {
+                window.open('https://www.w3schools.com/css/default.asp', '_blank');
+            }
+            else if (pageTitle.includes('JavaScript Documentation')) {
+                window.open('https://www.w3schools.com/js/default.asp', '_blank');
+            }
+            else if (pageTitle.includes('Framework Documentation')) {
+                window.open('https://www.w3schools.com/react/', '_blank');
+            }
+        }
+    </script>
+</body>
+</html> 
