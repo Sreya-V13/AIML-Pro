@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">  
 </head>
 <body>
+    <!-- Particles.js Container -->
+    <div id="particles-js"></div>
+
     <!-- Animated Header -->
     <div class="header animate-fade-in">
         <div class="logo">
@@ -30,9 +33,9 @@
             <a href="/skills" class="banner-button primary-btn">
                 <i class="fas fa-rocket"></i> Explore Skills
             </a>
-            <a href="#featured" class="banner-button secondary-btn">
+            <!-- <a href="#featured" class="banner-button secondary-btn">
                 <i class="fas fa-star"></i> Featured Courses
-            </a>
+            </a> -->
         </div>
     </div>
 
@@ -122,6 +125,74 @@
 
         // Observe all animated elements
         document.querySelectorAll('.animate-fade-in, .animate-slide-up, .animate-slide-down').forEach((el) => observer.observe(el));
+    </script>
+
+    <!-- Particles.js Script -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // Initialize Particles.js
+        particlesJS('particles-js', {
+            particles: {
+                number: {
+                    value: 80,
+                    density: {
+                        enable: true,
+                        value_area: 800
+                    }
+                },
+                color: {
+                    value: '#64ffda'
+                },
+                shape: {
+                    type: 'circle'
+                },
+                opacity: {
+                    value: 0.5,
+                    random: true,
+                    animation: {
+                        enable: true,
+                        speed: 1,
+                        minimumValue: 0.1,
+                        sync: false
+                    }
+                },
+                size: {
+                    value: 3,
+                    random: true
+                },
+                line_linked: {
+                    enable: true,
+                    distance: 150,
+                    color: '#64ffda',
+                    opacity: 0.4,
+                    width: 1
+                },
+                move: {
+                    enable: true,
+                    speed: 6,
+                    direction: 'none',
+                    random: false,
+                    straight: false,
+                    outMode: 'out',
+                    bounce: false,
+                }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: {
+                    onhover: {
+                        enable: true,
+                        mode: 'repulse'
+                    },
+                    onclick: {
+                        enable: true,
+                        mode: 'push'
+                    },
+                    resize: true
+                }
+            },
+            retina_detect: true
+        });
     </script>
 </body>
 </html>

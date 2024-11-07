@@ -135,28 +135,12 @@
             </div>
         </div>
 
-        <!-- Add after the existing buttons -->
+        <!-- Replace the existing reminder section with this -->
         <div class="reminder-section">
             <button class="btn-reminder" id="reminderBtn">
-                <i class="fas fa-bell"></i> Get Learning Reminders
+                <i class="fas fa-bell"></i>
+                Get Learning Reminders
             </button>
-            
-            <!-- Email Modal -->
-            <div id="emailModal" class="modal">
-                <div class="modal-content reminder-modal">
-                    <span class="close">&times;</span>
-                    <div class="reminder-form">
-                        <h2><i class="fas fa-bell"></i> Setup Learning Reminders</h2>
-                        <p>Enter your email to receive reminders and progress updates for your learning journey.</p>
-                        <form id="reminderForm">
-                            <input type="email" id="userEmail" placeholder="Enter your email" required>
-                            <button type="submit" class="btn-submit">
-                                <i class="fas fa-paper-plane"></i> Subscribe
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -698,76 +682,20 @@
         // Add click event listener for save button
         document.getElementById('saveProgress').addEventListener('click', saveProgress);
 
-        // Add after existing script
-        const reminderBtn = document.getElementById('reminderBtn');
-        const emailModal = document.getElementById('emailModal');
-        const reminderForm = document.getElementById('reminderForm');
-
-        reminderBtn.addEventListener('click', () => {
-            emailModal.style.display = 'block';
-        });
-
-        reminderForm.addEventListener('submit', async (e) => {
+        // Replace the existing reminder JavaScript with this
+        document.getElementById('reminderBtn').addEventListener('click', function(e) {
             e.preventDefault();
-            const userEmail = document.getElementById('userEmail').value;
-            const currentSkill = document.querySelector('.skill-header h1').textContent;
+            const subject = encodeURIComponent('Learning Journey Subscription');
+            const body = encodeURIComponent(`Hi SkillCraft AI Team,
+
+I would like to receive reminders for this learning journey. I discovered your platform, which offers structured learning paths and personalized guidance for various tech skills. I'm interested in staying connected and receiving updates about my learning progress.
+
+Looking forward to this learning journey with SkillCraft AI.
+
+Best regards`);
             
-            try {
-                const response = await fetch('/send_reminder_emails', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        user_email: userEmail,
-                        skill_name: currentSkill
-                    })
-                });
-
-                const data = await response.json();
-                
-                if (!response.ok) throw new Error(data.error || 'Failed to send emails');
-
-                // Show success toast
-                const toast = document.getElementById('successToast');
-                toast.innerHTML = `
-                    <div class="toast-content">
-                        <i class="fas fa-check-circle"></i>
-                        <div class="toast-message">
-                            <h4>Successfully Subscribed!</h4>
-                            <p>Check your email for confirmation.</p>
-                        </div>
-                    </div>
-                `;
-                toast.style.visibility = 'visible';
-                toast.classList.add('show');
-                
-                // Close modal
-                emailModal.style.display = 'none';
-
-            } catch (error) {
-                console.error('Error:', error);
-                const toast = document.getElementById('successToast');
-                toast.innerHTML = `
-                    <div class="toast-content error">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <div class="toast-message">
-                            <h4>Subscription Failed</h4>
-                            <p>Please try again later.</p>
-                        </div>
-                    </div>
-                `;
-                toast.style.visibility = 'visible';
-                toast.classList.add('show');
-            }
+            window.location.href = `mailto:aiskillcraft@gmail.com?subject=${subject}&body=${body}`;
         });
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            if (event.target == emailModal) {
-                emailModal.style.display = 'none';
-            }
-        }
 
         // Add these CSS classes for better animations
         const styleSheet = document.createElement('style');

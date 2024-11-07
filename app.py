@@ -139,6 +139,25 @@ def start_learning(skill_name):
     except Exception as e:
         return f"Error: {str(e)}", 500
 
+@app.route('/learning_journey/<skill_name>')
+def learning_journey(skill_name):
+    try:
+        # Get the skill data from your DataFrame
+        skill_info = skills_data[skills_data['Skill Name'] == skill_name].iloc[0]
+        
+        # Convert to dictionary and ensure the name is properly set
+        skill = {
+            'name': skill_info['Skill Name'],  # This ensures we get the actual name
+            'Domain': skill_info['Domain'],
+            'Level': skill_info['Level'],
+            'Duration (hours)': skill_info['Duration (hours)']
+        }
+        
+        return render_template('learning_journey.html', skill=skill)
+    except Exception as e:
+        print(f"Error in learning_journey route: {str(e)}")
+        return render_template('404.html'), 404
+
 class ModernFlowchartGenerator:
     def __init__(self):
         self.graph_dir = 'static/flowcharts'
@@ -2957,26 +2976,26 @@ def send_email():
 def send_reminder_emails():
     try:
         data = request.get_json()
+        user_name = data.get('user_name')
         user_email = data.get('user_email')
         skill_name = data.get('skill_name')
 
-        # Send admin notification
+        # Send notification to admin
         admin_msg = Message(
             'New Learning Journey Subscription',
             sender='aiskillcraft@gmail.com',
             recipients=['aiskillcraft@gmail.com']
         )
-        admin_msg.body = f"New user {user_email} has subscribed to {skill_name} learning journey."
+        admin_msg.body = f"""
+            New Learning Journey Subscription:
+            
+            User Name: {user_name}
+            User Email: {user_email}
+            Selected Skill: {skill_name}
+            
+            This user has subscribed to receive reminders for the {skill_name} learning journey.
+        """
         mail.send(admin_msg)
-
-        # Send user confirmation
-        user_msg = Message(
-            f'Welcome to {skill_name} Learning Journey',
-            sender='aiskillcraft@gmail.com',
-            recipients=[user_email]
-        )
-        user_msg.body = f"Thank you for subscribing to {skill_name} learning journey! We'll keep you updated on your progress."
-        mail.send(user_msg)
 
         return jsonify({"success": True}), 200
 
