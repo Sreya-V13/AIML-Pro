@@ -83,9 +83,12 @@
                             <button onclick="showDocumentation('{{ step }}')" class="resource-btn secondary-doc" id="doc-btn-{{ step }}" style="display: none;">
                                 <i class="fas fa-external-link-alt"></i> Documentation
                             </button>
-                            <a href="#" class="resource-link" onclick="showResources('{{ step }}')">
+                            
+                            <!-- Updated Video Tutorials button -->
+                            <button onclick="openVideoTutorial('{{ step }}')" class="resource-btn">
                                 <i class="fas fa-video"></i> Video Tutorials
-                            </a>
+                            </button>
+                            
                             <a href="#" class="resource-link" onclick="showResources('{{ step }}')">
                                 <i class="fas fa-laptop-code"></i> Practice Projects
                             </a>
@@ -108,15 +111,51 @@
                 <i class="fas fa-undo"></i> Reset Progress
             </button>
         </div>
-    </div>
 
-    <!-- Resource Modal -->
-    <div id="resourceModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Learning Resources</h2>
-            <div class="resource-grid">
-                <!-- Resources will be dynamically populated -->
+        <!-- Add this: Success Toast -->
+        <div id="successToast" class="toast">
+            <div class="toast-content">
+                <i class="fas fa-check-circle"></i>
+                <span>Progress Saved Successfully!</span>
+            </div>
+        </div>
+
+        <!-- Add this: Reset Confirmation Modal -->
+        <div id="resetModal" class="modal">
+            <div class="modal-content reset-modal">
+                <div class="reset-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h2>Reset Progress</h2>
+                    <p>Are you sure you want to reset all progress? This action cannot be undone.</p>
+                    <div class="reset-buttons">
+                        <button id="confirmReset" class="btn-confirm">Yes, Reset</button>
+                        <button id="cancelReset" class="btn-cancel">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add after the existing buttons -->
+        <div class="reminder-section">
+            <button class="btn-reminder" id="reminderBtn">
+                <i class="fas fa-bell"></i> Get Learning Reminders
+            </button>
+            
+            <!-- Email Modal -->
+            <div id="emailModal" class="modal">
+                <div class="modal-content reminder-modal">
+                    <span class="close">&times;</span>
+                    <div class="reminder-form">
+                        <h2><i class="fas fa-bell"></i> Setup Learning Reminders</h2>
+                        <p>Enter your email to receive reminders and progress updates for your learning journey.</p>
+                        <form id="reminderForm">
+                            <input type="email" id="userEmail" placeholder="Enter your email" required>
+                            <button type="submit" class="btn-submit">
+                                <i class="fas fa-paper-plane"></i> Subscribe
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -124,9 +163,22 @@
     <!-- Documentation Modal -->
     <div id="documentationModal" class="modal">
         <div class="modal-content documentation-modal">
-            <span class="close">&times;</span>
+            <span class="close" onclick="closeDocumentationModal()">&times;</span>
             <div id="documentationContent">
                 <!-- Documentation content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add this modal for practice projects -->
+    <div id="projectsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeProjectsModal()">&times;</span>
+            <div class="projects-wrapper">
+                <h2 class="projects-title"></h2>
+                <div class="projects-grid">
+                    <!-- Projects will be loaded here dynamically -->
+                </div>
             </div>
         </div>
     </div>
@@ -163,6 +215,7 @@
                 lastSaved: new Date().toISOString()
             };
             localStorage.setItem('learningProgress', JSON.stringify(progressData));
+            showToast(); // Show success toast only after saving
         }
 
         function loadProgress() {
@@ -181,17 +234,8 @@
         function showResources(step) {
             const modal = document.getElementById('resourceModal');
             const resourceGrid = modal.querySelector('.resource-grid');
+            
             resourceGrid.innerHTML = `
-                <div class="resource-card">
-                    <h3>Documentation</h3>
-                    <p>Official documentation for ${step}</p>
-                    <a href="#" class="btn-resource">View Docs</a>
-                </div>
-                <div class="resource-card">
-                    <h3>Video Tutorials</h3>
-                    <p>Step-by-step video guides</p>
-                    <a href="#" class="btn-resource">Watch Videos</a>
-                </div>
                 <div class="resource-card">
                     <h3>Practice Projects</h3>
                     <p>Hands-on projects for ${step}</p>
@@ -271,9 +315,14 @@
 
         // Close modal when clicking the close button or outside
         window.onclick = function(event) {
-            const modal = document.getElementById('documentationModal');
-            if (event.target == modal || event.target.classList.contains('close')) {
-                modal.style.display = 'none';
+            const docModal = document.getElementById('documentationModal');
+            const projectsModal = document.getElementById('projectsModal');
+            
+            if (event.target == docModal) {
+                closeDocumentationModal();
+            }
+            if (event.target == projectsModal) {
+                closeProjectsModal();
             }
         }
 
@@ -295,6 +344,485 @@
                 window.open('https://www.w3schools.com/react/', '_blank');
             }
         }
+
+        // Video tutorial URLs for each topic
+        const videoTutorials = {
+            'HTML': 'https://youtu.be/qz0aGYrrlhU?si=t-h8wAe9I40kICTr',
+            'CSS': 'https://youtu.be/OXGznpKZ_sA?si=Ukgj3RQtIRZ_Atr-',
+            'JavaScript': 'https://youtu.be/EerdGm-ehJQ?si=3olbNLf_3MK0l1MR',
+            'Framework': 'https://youtu.be/bMknfKXIFA8?si=cBroxRWrQKRQxGEB'
+        };
+
+        // Function to open video tutorial
+        function openVideoTutorial(topic) {
+            const videoUrl = videoTutorials[topic.trim()];
+            if (videoUrl) {
+                window.open(videoUrl, '_blank');
+            }
+        }
+
+        // Practice Projects Data
+        const practiceProjects = {
+            'HTML': [
+                {
+                    name: 'Personal Blog',
+                    description: 'Create a simple blog layout with header, articles, and sidebar',
+                    difficulty: 'Beginner',
+                    codepenLink: 'https://codepen.io/pen?template=html-blog',
+                    tags: ['Layout', 'Semantic HTML']
+                },
+                {
+                    name: 'Product Landing Page',
+                    description: 'Build a product showcase page with features and pricing sections',
+                    difficulty: 'Beginner',
+                    codepenLink: 'https://codepen.io/pen?template=html-product',
+                    tags: ['Forms', 'Tables']
+                },
+                {
+                    name: 'Portfolio Website',
+                    description: 'Create a multi-page portfolio with projects and contact form',
+                    difficulty: 'Intermediate',
+                    codepenLink: 'https://codepen.io/pen?template/html-portfolio',
+                    tags: ['Forms', 'Navigation']
+                },
+                {
+                    name: 'Restaurant Website',
+                    description: 'Design a complete restaurant website with menu and reservation system',
+                    difficulty: 'Intermediate',
+                    codepenLink: 'https://codepen.io/pen?template/html-restaurant',
+                    tags: ['Forms', 'Tables', 'Layout']
+                },
+                {
+                    name: 'E-commerce Product Page',
+                    description: 'Build a complex product page with image gallery and specifications',
+                    difficulty: 'Advanced',
+                    codepenLink: 'https://codepen.io/pen?template/html-ecommerce',
+                    tags: ['Complex Layout', 'Forms', 'Tables']
+                }
+            ],
+            'CSS': [
+                {
+                    name: 'Button Animations',
+                    description: 'Create a collection of animated buttons with hover effects',
+                    difficulty: 'Beginner',
+                    codepenLink: 'https://codepen.io/pen?template=css-buttons',
+                    tags: ['Animations', 'Hover Effects']
+                },
+                {
+                    name: 'Profile Cards',
+                    description: 'Design beautiful profile cards with hover animations',
+                    difficulty: 'Beginner',
+                    codepenLink: 'https://codepen.io/pen?template/css-cards',
+                    tags: ['Cards', 'Flexbox']
+                },
+                {
+                    name: 'Responsive Navigation',
+                    description: 'Build a responsive navbar with hamburger menu animation',
+                    difficulty: 'Intermediate',
+                    codepenLink: 'https://codepen.io/pen?template/css-nav',
+                    tags: ['Responsive', 'Animation']
+                },
+                {
+                    name: 'Image Gallery Grid',
+                    description: 'Create an interactive image gallery with filtering options',
+                    difficulty: 'Intermediate',
+                    codepenLink: 'https://codepen.io/pen?template/css-gallery',
+                    tags: ['Grid', 'Filters']
+                },
+                {
+                    name: '3D Card Flip',
+                    description: 'Implement advanced 3D card flip animations with perspective',
+                    difficulty: 'Advanced',
+                    codepenLink: 'https://codepen.io/pen?template/css-3d',
+                    tags: ['3D', 'Transform', 'Perspective']
+                }
+            ],
+            'JavaScript': [
+                {
+                    name: 'Interactive Quiz',
+                    description: 'Create a simple quiz with score tracking',
+                    difficulty: 'Beginner',
+                    codepenLink: 'https://codepen.io/pen?template/js-quiz',
+                    tags: ['DOM', 'Events']
+                },
+                {
+                    name: 'Todo List',
+                    description: 'Build a todo list with local storage',
+                    difficulty: 'Beginner',
+                    codepenLink: 'https://codepen.io/pen?template/js-todo',
+                    tags: ['CRUD', 'Local Storage']
+                },
+                {
+                    name: 'Memory Card Game',
+                    description: 'Create a memory matching card game with animations',
+                    difficulty: 'Intermediate',
+                    codepenLink: 'https://codepen.io/pen?template/js-memory',
+                    tags: ['Game Logic', 'Animations']
+                },
+                {
+                    name: 'Weather Dashboard',
+                    description: 'Build a weather app using API and async operations',
+                    difficulty: 'Intermediate',
+                    codepenLink: 'https://codepen.io/pen?template/js-weather',
+                    tags: ['API', 'Async/Await']
+                },
+                {
+                    name: 'Kanban Board',
+                    description: 'Create a drag-and-drop kanban board for task management',
+                    difficulty: 'Advanced',
+                    codepenLink: 'https://codepen.io/pen?template/js-kanban',
+                    tags: ['Drag & Drop', 'Complex State']
+                }
+            ],
+            'Framework': [
+                {
+                    name: 'Task Manager',
+                    description: 'Build a task management app with React components and state management',
+                    difficulty: 'Beginner',
+                    codepenLink: 'https://stackblitz.com/edit/react-task-manager-starter',
+                    tags: ['Components', 'State', 'Props']
+                },
+                {
+                    name: 'Social Media Dashboard',
+                    description: 'Create a responsive dashboard with dynamic data and theme switching',
+                    difficulty: 'Beginner',
+                    codepenLink: 'https://stackblitz.com/edit/react-dashboard-starter',
+                    tags: ['Hooks', 'Context', 'Routing']
+                },
+                {
+                    name: 'E-commerce Cart',
+                    description: 'Develop a shopping cart with Redux state management and animations',
+                    difficulty: 'Intermediate',
+                    codepenLink: 'https://stackblitz.com/edit/react-cart-redux-starter',
+                    tags: ['Redux', 'Effects', 'API Integration']
+                },
+                {
+                    name: 'Real-time Chat App',
+                    description: 'Build a chat application with Firebase integration and real-time updates',
+                    difficulty: 'Intermediate',
+                    codepenLink: 'https://stackblitz.com/edit/react-chat-firebase-starter',
+                    tags: ['Firebase', 'Real-time', 'Authentication']
+                },
+                {
+                    name: 'Project Management System',
+                    description: 'Create a full-featured project management tool with multiple views and data visualization',
+                    difficulty: 'Advanced',
+                    codepenLink: 'https://stackblitz.com/edit/react-project-management-starter',
+                    tags: ['Complex State', 'Charts', 'Performance']
+                }
+            ]
+        };
+
+        // Function to show projects modal
+        function showResources(topic) {
+            console.log("Opening modal for:", topic); // Debug log
+            const modal = document.getElementById('projectsModal');
+            if (!modal) {
+                console.error("Modal element not found!");
+                return;
+            }
+
+            const projectsGrid = modal.querySelector('.projects-grid');
+            const projectsTitle = modal.querySelector('.projects-title');
+            
+            projectsTitle.textContent = `${topic} Practice Projects`;
+            projectsGrid.innerHTML = ''; // Clear existing content
+            
+            const projects = practiceProjects[topic] || [];
+            
+            projects.forEach((project, index) => {
+                const isFramework = topic === 'Framework';
+                const buttonText = isFramework ? 'Open in StackBlitz' : 'Try on CodePen';
+                const buttonIcon = isFramework ? 'fas fa-code-branch' : 'fab fa-codepen';
+                
+                const projectCard = `
+                    <div class="project-card" style="animation: fadeInUp ${0.2 + index * 0.1}s ease-out">
+                        <div class="project-header">
+                            <h3>${project.name}</h3>
+                            <span class="difficulty-badge ${project.difficulty.toLowerCase()}">
+                                ${project.difficulty}
+                            </span>
+                        </div>
+                        <p>${project.description}</p>
+                        <div class="project-tags">
+                            ${project.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                        <a href="${project.codepenLink}" target="_blank" class="codepen-btn">
+                            <i class="${buttonIcon}"></i> ${buttonText}
+                        </a>
+                    </div>
+                `;
+                projectsGrid.insertAdjacentHTML('beforeend', projectCard);
+            });
+            
+            modal.style.display = 'block';
+            modal.classList.add('modal-open');
+        }
+
+        // Function to close the modal
+        function closeProjectsModal() {
+            const modal = document.getElementById('projectsModal');
+            modal.classList.remove('modal-open');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('projectsModal');
+            if (event.target == modal) {
+                closeProjectsModal();
+            }
+        }
+
+        // Add event listener for ESC key to close modal
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeProjectsModal();
+            }
+        });
+
+        // Add this function for closing documentation modal
+        function closeDocumentationModal() {
+            const modal = document.getElementById('documentationModal');
+            if (modal) {
+                modal.style.display = 'none';
+                // Clear the content when closing
+                const content = document.getElementById('documentationContent');
+                if (content) {
+                    content.innerHTML = '';
+                }
+            }
+        }
+
+        // Event listener for clicking outside the modal
+        window.onclick = function(event) {
+            const docModal = document.getElementById('documentationModal');
+            const projectsModal = document.getElementById('projectsModal');
+            
+            if (event.target === docModal) {
+                closeDocumentationModal();
+            }
+            if (event.target === projectsModal) {
+                closeProjectsModal();
+            }
+        }
+
+        // Event listener for ESC key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeDocumentationModal();
+                closeProjectsModal();
+            }
+        });
+
+        // Make sure all close buttons work
+        document.querySelectorAll('.close').forEach(button => {
+            button.addEventListener('click', function() {
+                const modal = this.closest('.modal');
+                if (modal.id === 'documentationModal') {
+                    closeDocumentationModal();
+                } else if (modal.id === 'projectsModal') {
+                    closeProjectsModal();
+                }
+            });
+        });
+
+        // Add these functions after your existing script
+        function showToast() {
+            const toast = document.getElementById('successToast');
+            toast.style.visibility = 'visible'; // Make visible first
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100); // Small delay to ensure visibility is set first
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.style.visibility = 'hidden';
+                }, 500); // Hide after animation completes
+            }, 3000);
+        }
+
+        // Add reset functionality
+        document.getElementById('resetProgress').addEventListener('click', () => {
+            const resetModal = document.getElementById('resetModal');
+            resetModal.style.display = 'block';
+        });
+
+        document.getElementById('confirmReset').addEventListener('click', () => {
+            // Reset all checkboxes
+            steps.forEach(step => step.checked = false);
+            
+            // Reset progress circle and text
+            progress = 0;
+            progressCircle.style.setProperty('--progress', 0);
+            progressPercentage.textContent = '0%';
+            stepsCompleted.textContent = `0/${steps.length}`;
+            
+            // Clear localStorage
+            localStorage.removeItem('learningProgress');
+            
+            // Close modal with fade out animation
+            const resetModal = document.getElementById('resetModal');
+            resetModal.style.opacity = '0';
+            setTimeout(() => {
+                resetModal.style.display = 'none';
+                resetModal.style.opacity = '1';
+            }, 300);
+        });
+
+        document.getElementById('cancelReset').addEventListener('click', () => {
+            const resetModal = document.getElementById('resetModal');
+            resetModal.style.display = 'none';
+        });
+
+        // Close reset modal when clicking outside
+        window.onclick = function(event) {
+            const resetModal = document.getElementById('resetModal');
+            const docModal = document.getElementById('documentationModal');
+            const projectsModal = document.getElementById('projectsModal');
+            
+            if (event.target == resetModal) {
+                resetModal.style.display = 'none';
+            }
+            if (event.target == docModal) {
+                closeDocumentationModal();
+            }
+            if (event.target == projectsModal) {
+                closeProjectsModal();
+            }
+        }
+
+        // Add click event listener for save button
+        document.getElementById('saveProgress').addEventListener('click', saveProgress);
+
+        // Add after existing script
+        const reminderBtn = document.getElementById('reminderBtn');
+        const emailModal = document.getElementById('emailModal');
+        const reminderForm = document.getElementById('reminderForm');
+
+        reminderBtn.addEventListener('click', () => {
+            emailModal.style.display = 'block';
+        });
+
+        reminderForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userEmail = document.getElementById('userEmail').value;
+            const currentSkill = document.querySelector('.skill-header h1').textContent;
+            
+            try {
+                const response = await fetch('/send_reminder_emails', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_email: userEmail,
+                        skill_name: currentSkill
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) throw new Error(data.error || 'Failed to send emails');
+
+                // Show success toast
+                const toast = document.getElementById('successToast');
+                toast.innerHTML = `
+                    <div class="toast-content">
+                        <i class="fas fa-check-circle"></i>
+                        <div class="toast-message">
+                            <h4>Successfully Subscribed!</h4>
+                            <p>Check your email for confirmation.</p>
+                        </div>
+                    </div>
+                `;
+                toast.style.visibility = 'visible';
+                toast.classList.add('show');
+                
+                // Close modal
+                emailModal.style.display = 'none';
+
+            } catch (error) {
+                console.error('Error:', error);
+                const toast = document.getElementById('successToast');
+                toast.innerHTML = `
+                    <div class="toast-content error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <div class="toast-message">
+                            <h4>Subscription Failed</h4>
+                            <p>Please try again later.</p>
+                        </div>
+                    </div>
+                `;
+                toast.style.visibility = 'visible';
+                toast.classList.add('show');
+            }
+        });
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target == emailModal) {
+                emailModal.style.display = 'none';
+            }
+        }
+
+        // Add these CSS classes for better animations
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = `
+            .animate-toast {
+                animation: slideIn 0.5s ease-out;
+            }
+
+            .modal-fade-out {
+                animation: fadeOut 0.3s ease-out;
+            }
+
+            .toast-content {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .toast-message h4 {
+                margin: 0;
+                font-size: 16px;
+                font-weight: 600;
+            }
+
+            .toast-message p {
+                margin: 4px 0 0;
+                font-size: 14px;
+                opacity: 0.9;
+            }
+
+            .toast-content.error {
+                background: linear-gradient(135deg, #ff4444, #cc0000);
+            }
+
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes fadeOut {
+                from {
+                    opacity: 1;
+                }
+                to {
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(styleSheet);
     </script>
 </body>
 </html> 

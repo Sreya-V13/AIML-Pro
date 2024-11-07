@@ -6,7 +6,7 @@
     <title>AI Skill Learning</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <!-- Add Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">  
 </head>
 <body>
     <!-- Animated Header -->
@@ -53,26 +53,11 @@
         </div>
     </section>
 
-    <!-- Featured Courses Section -->
-    <section id="featured" class="courses-section animate-slide-up">
-        <h2>Featured AI Courses</h2>
-        <div class="courses-grid">
-            <div class="course-card">
-                <div class="course-image">
-                    <img src="{{ url_for('static', filename='images/ML.png') }}" alt="Machine Learning">
-                </div>
-                <div class="course-content">
-                    <h3>Machine Learning Fundamentals</h3>
-                    <div class="course-meta">
-                        <span><i class="fas fa-clock"></i> 8 weeks</span>
-                        <span><i class="fas fa-star"></i> 4.8</span>
-                    </div>
-                    <p>Master the basics of Machine Learning algorithms and implementations</p>
-                    <a href="/course/ml" class="course-btn">Learn More</a>
-                </div>
-            </div>
-            <!-- Add more course cards as needed -->
-        </div>
+    <!-- Reminders Feature Section -->
+    <section id="reminders" class="reminders-section animate-slide-up">
+        <h2>Skill Completion Reminders</h2>
+        <p>We provide reminders for skill completion to help you stay focused on your learning journey. Stay on track and never miss a deadline!</p>
+        <p>Check your email for reminders about your progress and upcoming tasks.</p>
     </section>
 
     <!-- Statistics Section -->

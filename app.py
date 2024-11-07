@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import networkx as nx
 import matplotlib
 matplotlib.use('Agg')
@@ -9,8 +9,22 @@ import pandas as pd
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 import numpy as np
 from datetime import datetime, timedelta
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from flask_mail import Mail, Message  # Add at top with other imports if not already there
 
 app = Flask(__name__)
+
+# Initialize Mail after creating Flask app
+mail = Mail(app)
+
+# Email configuration
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'aiskillcraft@gmail.com'
+app.config['MAIL_PASSWORD'] = 'wgkt scvh ybhm bzdw'  # Your new App Password
 
 # Skills data
 skills_data = pd.DataFrame({
@@ -2794,7 +2808,6 @@ def get_documentation(skill, topic):
                                     <li>GORM</li>
                                     <li>Go Modules</li>
                                 </ul>
-                            </a>
                         </div>""" if topic == 'Choose Language' else
 
                         # Database section
@@ -2896,7 +2909,6 @@ def get_documentation(skill, topic):
                                     <li>Middleware</li>
                                     <li>API Security</li>
                                 </ul>
-                            </a>
                         </div>""" if topic == 'Security' else ''
                     }
                 </div>
@@ -2914,6 +2926,63 @@ def get_documentation(skill, topic):
         return jsonify(response_data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/send-email', methods=['POST'])
+def send_email():
+    try:
+        data = request.json
+        recipient_email = data['email']
+        subject = data['subject']
+        content = data['content']
+
+        # Create message
+        msg = Message(
+            subject=subject,
+            sender=app.config['MAIL_USERNAME'],
+            recipients=[recipient_email]
+        )
+        msg.body = content
+
+        # Send email
+        mail.send(msg)
+        
+        print(f"Email sent successfully to {recipient_email}")  # Debug log
+        return jsonify({"success": True, "message": "Email sent successfully"})
+        
+    except Exception as e:
+        print(f"Email Error: {str(e)}")  # Debug log
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/send_reminder_emails', methods=['POST'])
+def send_reminder_emails():
+    try:
+        data = request.get_json()
+        user_email = data.get('user_email')
+        skill_name = data.get('skill_name')
+
+        # Send admin notification
+        admin_msg = Message(
+            'New Learning Journey Subscription',
+            sender='aiskillcraft@gmail.com',
+            recipients=['aiskillcraft@gmail.com']
+        )
+        admin_msg.body = f"New user {user_email} has subscribed to {skill_name} learning journey."
+        mail.send(admin_msg)
+
+        # Send user confirmation
+        user_msg = Message(
+            f'Welcome to {skill_name} Learning Journey',
+            sender='aiskillcraft@gmail.com',
+            recipients=[user_email]
+        )
+        user_msg.body = f"Thank you for subscribing to {skill_name} learning journey! We'll keep you updated on your progress."
+        mail.send(user_msg)
+
+        return jsonify({"success": True}), 200
+
+    except Exception as e:
+        print(f"Email Error: {str(e)}")  # For debugging
+        return jsonify({"success": False, "error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
